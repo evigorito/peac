@@ -1,0 +1,21 @@
+source('/home/ev250/Cincinatti/Functions/various.R')
+
+#' Save an  exons per  gene as rds object
+#' 
+#' get exons per gene from gtf file to help calculating counts per gene and save it as rds
+#' @param gtf full name of gtf file for a particular built
+#' @param mode="Union", input for summarizeOverlaps, 
+#' @param singleEnd=FALSE, input for summarizeOverlaps, defaults pair end
+#' @param ignore.strand=TRUE, summarizeOverlaps
+#' @param out full path and name to output rds file 
+#' @keywords exons per gene
+#' @export
+#' @return object class GRangesList from GenomicRanges package
+#' gtf2ebg
+
+gtf2ebg <- function(gtf_file, mode="Union", singleEnd=FALSE, ignore.strand=TRUE, out){
+    txdb <- makeTxDbFromGFF(gtf_file, format="gtf", circ_seqs=character())
+    ebg<-exonsBy(txdb, by="gene")
+    saveRDS(ebg, "/mrc-bsu/scratch/ev250/EGEUV1/quant/RNA_counts/b37_ebg.rds")
+    
+}

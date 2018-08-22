@@ -1,0 +1,31 @@
+source('/home/ev250/Cincinatti/Functions/various.R')
+
+## Prepare matrix of counts per gene: 
+
+ebg <-  snakemake@input[[2]]
+sample <- snakemake@param[['sample_name']]
+reads <- snakemake@param[['read_type']]
+mode <- snakemake@param[['mode']]
+ignore.strand <- as.logical(snakemake@param[['ignore.strand']]
+
+H=as.numeric(args[1]) # sample number
+path <-  dirname(snakemake@param[[input[[1]]]])
+bam.name <- basename(snakemake@param[[input[[1]]]])
+
+ebg <- readRDS(ebg)
+
+if(reads=="Paired"){
+    singleEnd==FALSE
+} else {
+    singleEnd==TRUE
+}
+
+
+#samples <- fread("/mrc-bsu/scratch/ev250/EGEUV1/sample_info/GBR.sample.id", header=F)
+
+counts <- counts_sample_sub(ebg,dir,bam.name, mode=mode,singleEnd=FALSE, ignore.strand=TRUE)
+
+write.table(counts, file=paste0("/mrc-bsu/scratch/ev250/EGEUV1/quant/RNA_counts/counts_sample/",samples$V1[H],".txt"), row.names=F)
+
+
+do_something(snakemake@input[[1]], snakemake@output[[1]], snakemake@thrads, snakemake@config[["myparam"]
