@@ -25,35 +25,33 @@
     "ref_fasta" : "/home/ev250/rds/hpc-work/reference_genome/built37/Homo_sapiens.GRCh37.dna.primary_assembly.fa",
 
     "ref_gtf" :  "/home/ev250/rds/hpc-work/reference_genome/built37/Homo_sapiens.GRCh37.87.gtf",
-
     "indices" : "/mrc-bsu/scratch/ev250/reference_genome/built37/indices",
 
-    # path to save file for exon by gene rds object to use for counting reads
+    # path to save file for exon by gene rds object to use for counting reads, or path to file if already made.
 
     "ebg" : "/mrc-bsu/scratch/ev250/EGEUV1/quant/RNA_counts/b37_ebg.rds",
 
-    # location of chromInfo file containing chromosome names and lengths
-    # (can be downloaded from UCSC genome browser)
-    #"chrom_info" : "/iblm/netapp/home/gmcvicker/proj/WASP/examples/example_data/chromInfo.hg19.txt",
-
-    # directory to read VCF files from (used to write SNP input files)
-    #"vcf_dir" : "/iblm/netapp/home/gmcvicker/data1/external/1000Genomes/GRC37/20130502",
-
-    # OLD way: directory to write SNP plain text input files to
-    #"snp_dir" : "/iblm/netapp/home/gmcvicker/proj/WASP/examples/example_data/genotypes/snps",
-
-    # directory to write SNP HDF5 input files to
-    #snp_h5_dir : "/iblm/netapp/home/gmcvicker/proj/WASP/examples/example_data/genotypes/snp_h5",
-
-    # path to samtools
-    #"samtools" : "/iblm/netapp/home/gmcvicker/anaconda2/bin/samtools",
-
-    # path to bowtie2 aligner
-    #"bowtie2" : "/iblm/netapp/home/gmcvicker/anaconda2/bin/bowtie2",
-
-    # prefix for bowtie2 reference genome index
-    #"bowtie2_index" : "/iblm/netapp/data1/external/GRC37/combined/bowtie2_index/hg37",
+    # filter read cut-off for total gene counts
+    
+    "filter": 100,
 
     # sample file containing sample names and paths to fastq files
-    "sample_file" : "/mrc-bsu/scratch/ev250/emedlab/RNA/objects/RA.csv"
+    "sample_file" : "/mrc-bsu/scratch/ev250/emedlab/RNA/objects/RA.csv",
+
+    # sample file with metadata por peac study
+    "sample_meta": "/mrc-bsu/scratch/ev250/emedlab/RNA/objects/PEAC_eth.txt",
+
+    # file containing names and paths to vcf with genotype info file (exclude index)
+    "geno_vcf" : "/mrc-bsu/scratch/ev250/emedlab/RNA/objects/vcf_list.txt",
+
+    # file containing names and paths to reference panel bcf.gz
+    "ref_bcf" : "/mrc-bsu/scratch/ev250/emedlab/RNA/objects/refPanel_list.txt",
+
+    # file containing names and paths to reference panel legend.gz
+    "ref_legend" : "/mrc-bsu/scratch/ev250/emedlab/RNA/objects/refPanel_leg_list.txt",
+
+    # total number of PCs and PEER factors to use in Matrixqtl
+    "N factors" : 10
 }
+
+

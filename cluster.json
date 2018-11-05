@@ -1,0 +1,43 @@
+{
+    "__default__" :
+    {
+        "account" : "mrc-bsu-sl2-gpu",
+        "time" : "00:20:00",
+        "n" : 1,
+        "partition" : "bsu-gpu",
+        "job" : "J.{rule}",
+        "error" : "logs/cluster/{rule}.{wildcards}.out"
+    },
+    "star" :
+    {
+        "time" : "01:00:00",
+        "n" : 16
+    },
+    "exon_by_gene" :
+    {
+        "time" : "00:20:00",
+        "n" : 1,
+        "error": "logs/cluster/{rule}.out"
+    },
+    "total_gene_counts" :
+    {
+        "time" : "04:00:00",
+        "n" : 1,
+    },
+    "group_gene_counts" :
+    {
+        "time" : "00:10:00",
+        "n" : 1
+    },
+    "vcf_gds" :
+    {
+        "time" : "24:00:00",
+        "n" : 2
+    },
+    "RP_PCA" :
+    {
+        "time" : "00:05:00",
+        "n" : 16
+    }
+}
+

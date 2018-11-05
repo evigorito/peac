@@ -22,24 +22,29 @@ sel.sam <- function(x,batch=NULL,reads=NULL,timepoint=NULL,tissue=NULL,diagnosis
     f.names <- c("Batch","Reads","Timepoint","Tissue","Diagnosis")
     rem <- sapply(var,function(i) length(which(is.null(get(i))))==0)
     DT <- copy(x)
+    ## remove "b" from "SampleID..QMUL.ID.only."
+    DT[,SampleID..QMUL.ID.only.:= gsub("^b", "", SampleID..QMUL.ID.only.)]
     if(any(rem)){
         var <- var[rem]
         f.names2 <- f.names[rem]       
         for(i in seq_along(var)){
-            DT <- DT[get(f.names2[i]) %in% get(var[i]),]
+            DT2 <- DT[get(f.names2[i]) %in% get(var[i]),]
         }
-    } 
+    } else {
+        DT2=DT
+    }
+    
     ## convert to wide format, select columns for Python
-    DT <- reshape(DT[,.(SampleID..QMUL.or.Genentech.,N.files,hpc.sym)], idvar = "SampleID..QMUL.or.Genentech.", timevar = "N.files", direction = "wide")
+    DT2 <- reshape(DT2[,.(SampleID..QMUL.or.Genentech.,N.files,hpc.sym)], idvar = "SampleID..QMUL.or.Genentech.", timevar = "N.files", direction = "wide")
 
     ## Add individual ID (HospitalNumber) columns in f.names and GenotypeDirHpc that may become handy when processing pipeline
-    DT <- merge(DT, unique(x[,c("SampleID..QMUL.or.Genentech.", f.names,"HospitalNumber", "GenotypeDirHpc"), with=F]), by="SampleID..QMUL.or.Genentech.")
+    DT2 <- merge(DT2, unique(DT[,c("SampleID..QMUL.or.Genentech.", f.names, "HospitalNumber", "SampleID..QMUL.ID.only.", "GenotypeDirHpc"), with=F]), by="SampleID..QMUL.or.Genentech.")
 
     ## Reorder columns
 
-    setcolorder(DT, c("SampleID..QMUL.or.Genentech.", "HospitalNumber", f.names, "GenotypeDirHpc", grep("hpc", names(DT), value=T)))
+    setcolorder(DT2, c("SampleID..QMUL.or.Genentech.","HospitalNumber", "SampleID..QMUL.ID.only.", f.names, "GenotypeDirHpc", grep("hpc", names(DT2), value=T)))
     
-    return(DT)
+    return(DT2)
 
 }
 
