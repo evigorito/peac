@@ -1,8 +1,6 @@
 ## Snakefile for emedlab
 
 
-## https://snakemake.readthedocs.io/en/stable/project_info/faq.html#i-want-to-configure-the-behavior-of-my-shell-for-all-rules-how-can-that-be-achieved-with-snakemake
-
 ## https://hpc-carpentry.github.io/hpc-python/17-cluster/
 ## shell.executable("/bin/bash")
 ## shell.prefix("module load samtools-1.4-gcc-5.4.0-derfxbk; ")
@@ -124,37 +122,37 @@ rule star_index:
          " --sjdbGTFfile {input[1]} "
          " --sjdbOverhang 100 "  
 
-# rule star:
-#     """ Map paired or sigle end reads using STAR, stores single reads in dir 'single' and paired reads in 'paired' """
-#     input:
-#         lambda wildcards: read_samples()[wildcards.sample][7]
-#     output:
-#         config['output_dir'] + "/STAR/{read}/{sample}/Aligned.sortedByCoord.out.bam" 
-#     log:
-#         "logs/{read}/{sample}.log"
-#     params:
-#         index=config['indices'],
-#         read="zcat"
-#     threads: 16
-#     run:
-#         fq=[input] if isinstance(input, str) else input
-#         fq1 = ",".join(fq[0:len(fq):2])
-#         fq2 = ",".join(fq[1:len(fq):2])
-#         if len(fq2)>0:
-#             assert len(fq1) == len(fq2), "input-> equal number of files required for paired fasq files"
-#         input_str =  " ".join([fq1, fq2])
-#         print(input_str)
-#         out_dir = [item.replace("Aligned.sortedByCoord.out.bam", "") for item in output]
-#         shell(
-#             "{config[STAR]} "
-#             " --runThreadN {threads} "
-#             " --genomeDir {params.index} "
-#             " --readFilesIn {input_str} "
-#             " --readFilesCommand {params.read} "
-#             " --outSAMtype BAM SortedByCoordinate "
-#             " --outFileNamePrefix {out_dir} "
-#             " --outStd Log "
-#             " {log}")
+rule star:
+    """ Map paired or sigle end reads using STAR, stores single reads in dir 'single' and paired reads in 'paired' """
+    input:
+        lambda wildcards: read_samples()[wildcards.sample][7]
+    output:
+        config['output_dir'] + "/STAR/{read}/{sample}/Aligned.sortedByCoord.out.bam" 
+    log:
+        "logs/{read}/{sample}.log"
+    params:
+        index=config['indices'],
+        read="zcat"
+    threads: 16
+    run:
+        fq=[input] if isinstance(input, str) else input
+        fq1 = ",".join(fq[0:len(fq):2])
+        fq2 = ",".join(fq[1:len(fq):2])
+        if len(fq2)>0:
+            assert len(fq1) == len(fq2), "input-> equal number of files required for paired fasq files"
+        input_str =  " ".join([fq1, fq2])
+        print(input_str)
+        out_dir = [item.replace("Aligned.sortedByCoord.out.bam", "") for item in output]
+        shell(
+            "{config[STAR]} "
+            " --runThreadN {threads} "
+            " --genomeDir {params.index} "
+            " --readFilesIn {input_str} "
+            " --readFilesCommand {params.read} "
+            " --outSAMtype BAM SortedByCoordinate "
+            " --outFileNamePrefix {out_dir} "
+            " --outStd Log "
+            " {log}")
 
 rule exon_by_gene:
     """ Get exons per gene as a GRangesList from the gft annotation file used for the alignment, if not already done (to be uses for calculating total raw gene counts). Make a file with gene coordinates to define SNPS within cis-window. """
@@ -266,7 +264,7 @@ rule intersect_PEAC_RP:
 
 
 rule vcf_gds:
-    """ From vcf input per chromosome convert to gds while merging into 1 file. I apply it to RP and PEAC""" """ TEMPORARELY SAVED RP_PCA.gds AS RP_PCA2.gds, same PEAC  while pipeline re-running in case I want to use them"""
+    """ From vcf input per chromosome convert to gds while merging into 1 file. I apply it to RP and PEAC""" 
     input:
         expand(config['output_dir'] + "/DNA/PEAC_chr{chrom}_sub.vcf.gz", chrom=vcf(config["geno_vcf"]).keys()) ,
         expand(config['output_dir'] + "/DNA/RP_chr{chrom}_sub.vcf.gz", chrom=vcf(config["geno_vcf"]).keys())
