@@ -5,7 +5,7 @@
 ## shell.executable("/bin/bash")
 ## shell.prefix("module load samtools-1.4-gcc-5.4.0-derfxbk; ")
 shell.prefix("source ~/.bashrc; ")
-
+import pandas as pd
 configfile: "config.yaml"
 
 def read_samples():
@@ -84,12 +84,22 @@ def group_helper(samp_dict, u_val, batch):
 
 def vcf(path):
     """ Creates dictionary with keys chromosome name and values vcf full name.
-    argument is the path a file containing full names to vcf/bcf files
+    argument is the path to a file containing full names to vcf/bcf files
     """
     VcfFiles = open(path).read().splitlines()
     chr = [x.split("chr")[1].split(".")[0] for x in VcfFiles]
     VcfDic = dict(zip(chr, VcfFiles))
     return(VcfDic)      
+
+def gene_chrom(File=config['output_dir'] + "/gene_inputs/gene_coord.txt", sep=" "):
+    """ Makes a dictionary with keys gene and values chromosome from a file with first col gene_id and second col chrom (1 to 22) """
+    data=pd.read_csv(File, sep=sep)
+    ## select chrom 1:22
+    data=data[data.chrom.isin([str(x) for x in range(1,23)])]
+    keys=list(data['gene_id'])
+    values=[str(x) for x in data['chrom']]
+    dic=dict(zip(keys,values))
+    return dic
 
 rule all:
     input:
@@ -103,8 +113,9 @@ rule all:
         # expand(config['output_dir'] + "/matqtl/output/{pcs}.{peerBSex}.txt",
         #        pcs=["pcs" + str(x) for x in range(1,int(config['N factors'])+1)],
         #        peerBSex=["peerCqn" + str(x) for x in range(1,int(config['N factors'])+1)] + ["covSexBatch"])
-        expand(config['output_dir'] + "/matqtl/output/pcs0.{peerBSex}.txt",
-               peerBSex=["peerCqn" + str(x) for x in range(1,int(config['N factors'])+1)] + ["covSexBatch"])
+        #expand(config['output_dir'] + "/matqtl/output/pcs0.{peerBSex}.txt",
+        #       peerBSex=["peerCqn" + str(x) for x in range(1,int(config['N factors'])+1)] + ["covSexBatch"])
+        expand(config['output_dir'] + "/deseq2/inputs/{gene}.rds", gene=gene_chrom().keys() )
 
 rule star_index:
     """Create index for alignment using STAR"""
@@ -317,9 +328,7 @@ rule PCs_PEER:
         geneLoc=config['output_dir'] + "/matqtl/inputs/gene_location.txt",
         snpLoc=config['output_dir'] + "/matqtl/inputs/snp_location.txt"        
     script:
-        "Rscripts/PCsPEER.R"
-
-        
+        "Rscripts/PCsPEER.R"   
         
 rule Matqtl:
     """ Compute cis-QTL analysis by linear model. Uses 1:10 PCS and PEER factors"""
@@ -355,7 +364,24 @@ rule Matqtl2:
         "Rscripts/matqtl2.R"
     
         
-
+rule Deseq2_inputs:
+    """ Prepares inputs for running eQTL using Deseq2. Saves an R list with 2 elements: 1) data table with counts for gene; 2) data table with sample genotypes coded as 0,1,2 and NA plus columns SNP information. Also saves inputs into "out" directory. Saves file to match tags to SNPs, when tag option is chosen."""
+    input:
+        counts=expand(config['output_dir'] + "/RNA_counts/groups/{group}.txt", group=["Genentech_Paired_Baseline_Synovium_RA_Geno"]),
+        genecoord=config['output_dir'] + "/gene_inputs/gene_coord.txt",
+        vcf= lambda wildcards: vcf(config["geno_vcf"])[wildcards.gene]
+    params:
+        chrom=lambda wildcards: gene_chrom()[wildcards.gene],
+        snps=5*10^-5,
+        nhets=5,
+        tag=0.9,
+        missing=5,
+        out=config['output_dir'] + "/deseq2/inputs"
+    output:
+        in_deseq=config['output_dir'] + "/deseq2/inputs/{gene}.rds"
+    script:
+        "RScripts/deseq2.in.R"
+        
 
 
 
